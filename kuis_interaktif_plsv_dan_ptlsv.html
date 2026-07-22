@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif PLSV dan PtLSV</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'Segoe UI', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- KaTeX for rendering mathematical formulas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom CSS Styles -->
+    <style>
+        .katex-display { margin: 0.5em 0; overflow-x: auto; overflow-y: hidden; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .option-card:hover:not(.disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between selection:bg-blue-200">
+
+    <!-- Top Header Navigation -->
+    <header class="bg-gradient-to-r from-blue-700 via-indigo-700 to-blue-800 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white/10 p-2 rounded-xl backdrop-blur-sm border border-white/20">
+                    <i class="fa-solid me-1 fa-calculator text-yellow-300 text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">MathQuiz: PLSV & PtLSV</h1>
+                    <p class="text-xs text-blue-200">Persamaan & Pertidaksamaan Linear Satu Variabel</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <button id="audio-toggle" onclick="toggleAudio()" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium transition flex items-center gap-1.5 border border-white/20" title="Matikan/Hidupkan Suara">
+                    <i id="audio-icon" class="fa-solid fa-volume-high text-yellow-300"></i>
+                    <span class="hidden sm:inline">Suara</span>
+                </button>
+                <button id="scratchpad-toggle" onclick="toggleScratchpad()" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span class="hidden sm:inline">Coretan</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-4xl mx-auto w-full px-4 py-6 flex-grow">
+
+        <!-- START SCREEN -->
+        <div id="start-screen" class="glass-card rounded-2xl p-6 sm:p-8 shadow-xl text-center max-w-2xl mx-auto my-4 transition-all">
+            <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl shadow-inner">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2">Uji Pemahaman PLSV & PtLSV</h2>
+            <p class="text-slate-600 mb-6 text-sm sm:text-base leading-relaxed">
+                Kuis ini terdiri dari <strong class="text-blue-600">5 soal interaktif</strong> yang mencakup konsep dasar, penyelesaian persamaan, aturan tanda pertidaksamaan, hingga soal cerita kontekstual.
+            </p>
+
+            <!-- Quiz Settings / Instructions -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6 text-left">
+                <div class="bg-blue-50/70 p-3.5 rounded-xl border border-blue-100 flex items-center space-x-3">
+                    <div class="text-blue-600 text-lg"><i class="fa-solid fa-list-check"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500">Jumlah Soal</div>
+                        <div class="font-semibold text-slate-800 text-sm">5 Soal Pilihan Ganda</div>
+                    </div>
+                </div>
+                <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-100 flex items-center space-x-3">
+                    <div class="text-indigo-600 text-lg"><i class="fa-solid fa-lightbulb"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500">Fitur Pembahasan</div>
+                        <div class="font-semibold text-slate-800 text-sm">Langkah Lengkap</div>
+                    </div>
+                </div>
+                <div class="bg-emerald-50/70 p-3.5 rounded-xl border border-emerald-100 flex items-center space-x-3">
+                    <div class="text-emerald-600 text-lg"><i class="fa-solid fa-pen-line"></i></div>
+                    <div>
+                        <div class="text-xs text-slate-500">Papan Coretan</div>
+                        <div class="font-semibold text-slate-800 text-sm">Tersedia Kanvas</div>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-blue-500/25 transition transform active:scale-95 flex items-center justify-center gap-2 mx-auto">
+                <span>Mulai Kuis Sekarang</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+
+        <!-- QUIZ ACTIVE VIEW -->
+        <div id="quiz-view" class="hidden space-y-5">
+            <!-- Progress & Score Header -->
+            <div class="glass-card p-4 rounded-xl shadow-md flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <span id="question-badge" class="bg-blue-100 text-blue-700 font-bold px-3 py-1 rounded-lg text-sm border border-blue-200">
+                        Soal 1 dari 5
+                    </span>
+                    <div class="text-xs text-slate-500 hidden sm:block">
+                        <i class="fa-regular fa-clock me-1"></i> Waktu: <span id="timer-display" class="font-mono font-bold text-slate-700">00:00</span>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="flex-grow max-w-xs w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                    <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-indigo-600 h-2.5 rounded-full transition-all duration-300" style="width: 20%"></div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-slate-500">Skor Sementara:</span>
+                    <span id="live-score" class="font-bold text-emerald-600 text-sm bg-emerald-50 border border-emerald-200 px-2.5 py-0.5 rounded-md">0 / 100</span>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="glass-card rounded-2xl p-5 sm:p-7 shadow-lg relative">
+                <!-- Topic Tag -->
+                <div id="topic-tag" class="inline-block px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full mb-3">
+                    Topik
+                </div>
+
+                <!-- Question Text -->
+                <div id="question-text" class="text-base sm:text-lg font-medium text-slate-800 mb-6 leading-relaxed">
+                    <!-- Dynamic Question Content -->
+                </div>
+
+                <!-- Options Grid -->
+                <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+                    <!-- Dynamic Options -->
+                </div>
+
+                <!-- Feedback / Solution Box -->
+                <div id="feedback-box" class="hidden rounded-xl p-4 text-sm transition-all duration-300">
+                    <div id="feedback-title" class="font-bold flex items-center gap-2 mb-1.5"></div>
+                    <div id="feedback-body" class="text-slate-700 space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- Quiz Navigation Controls -->
+            <div class="flex items-center justify-between gap-3 pt-2">
+                <button id="prev-btn" onclick="prevQuestion()" class="px-4 py-2.5 bg-white text-slate-600 hover:bg-slate-50 border border-slate-300 rounded-xl font-medium text-sm transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm">
+                    <i class="fa-solid fa-chevron-left"></i>
+                    <span>Sebelumnya</span>
+                </button>
+                
+                <button id="next-btn" onclick="nextQuestion()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-2 shadow-md shadow-blue-500/20">
+                    <span>Selanjutnya</span>
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- SUMMARY / RESULT SCREEN -->
+        <div id="result-screen" class="hidden glass-card rounded-2xl p-6 sm:p-8 shadow-xl max-w-3xl mx-auto my-4">
+            <div class="text-center mb-8">
+                <div id="result-badge" class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-md">
+                    <i class="fa-solid fa-trophy"></i>
+                </div>
+                <h2 id="result-title" class="text-2xl font-bold text-slate-800 mb-1">Hasil Kuis Kamu</h2>
+                <p id="result-subtitle" class="text-slate-500 text-sm">Berikut ringkasan performa dan pembahasannya</p>
+            </div>
+
+            <!-- Score Stats Grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
+                <div class="bg-blue-50 border border-blue-100 rounded-xl p-3.5 text-center">
+                    <div class="text-xs text-blue-600 font-medium mb-1">Nilai Akhir</div>
+                    <div id="final-score" class="text-2xl sm:text-3xl font-extrabold text-blue-700">0</div>
+                </div>
+                <div class="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5 text-center">
+                    <div class="text-xs text-emerald-600 font-medium mb-1">Jawaban Benar</div>
+                    <div id="correct-count" class="text-2xl sm:text-3xl font-extrabold text-emerald-700">0 / 5</div>
+                </div>
+                <div class="bg-purple-50 border border-purple-100 rounded-xl p-3.5 text-center">
+                    <div class="text-xs text-purple-600 font-medium mb-1">Akurasi</div>
+                    <div id="accuracy-percent" class="text-2xl sm:text-3xl font-extrabold text-purple-700">0%</div>
+                </div>
+                <div class="bg-amber-50 border border-amber-100 rounded-xl p-3.5 text-center">
+                    <div class="text-xs text-amber-600 font-medium mb-1">Total Waktu</div>
+                    <div id="total-time" class="text-2xl sm:text-3xl font-extrabold text-amber-700">00:00</div>
+                </div>
+            </div>
+
+            <!-- Strengths & Recommendations -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-8 space-y-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">
+                    <i class="fa-solid fa-chart-line text-blue-600"></i>
+                    Evaluasi & Catatan Belajar
+                </h3>
+                <div id="feedback-evaluation" class="text-xs sm:text-sm text-slate-600 leading-relaxed space-y-2">
+                    <!-- Dynamic Evaluation -->
+                </div>
+            </div>
+
+            <!-- Detailed Solutions Accordion/Review -->
+            <div class="mb-8">
+                <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-book-open text-indigo-600"></i>
+                    Pembahasan Detail Semua Soal
+                </h3>
+                <div id="solutions-list" class="space-y-4">
+                    <!-- Dynamic Solution List -->
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4 border-t border-slate-200">
+                <button onclick="restartQuiz()" class="w-full sm:w-auto px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition shadow-md flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Coba Kuis Lagi</span>
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Interactive Scratchpad / Canvas Modal Drawer -->
+    <div id="scratchpad-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex flex-col justify-end sm:justify-center items-center p-2 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <!-- Header -->
+            <div class="bg-slate-800 text-white px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-pen-nib text-amber-400"></i>
+                    <span class="font-bold text-sm">Papan Coretan Hitungan</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button onclick="clearCanvas()" class="px-2.5 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-slate-200 transition">
+                        <i class="fa-solid fa-trash me-1"></i>Bersihkan
+                    </button>
+                    <button onclick="toggleScratchpad()" class="text-slate-400 hover:text-white p-1 text-lg">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Canvas Container -->
+            <div class="relative bg-slate-50 flex-grow h-80 sm:h-96 touch-none">
+                <canvas id="scratch-canvas" class="w-full h-full cursor-crosshair"></canvas>
+            </div>
+
+            <!-- Toolbar Foot -->
+            <div class="bg-slate-100 p-2.5 border-t border-slate-200 flex items-center justify-between text-xs">
+                <div class="flex items-center space-x-2">
+                    <span class="text-slate-500">Warna:</span>
+                    <button onclick="setPenColor('#1e293b')" class="w-6 h-6 rounded-full bg-slate-800 border-2 border-white shadow-sm"></button>
+                    <button onclick="setPenColor('#2563eb')" class="w-6 h-6 rounded-full bg-blue-600 border-2 border-white shadow-sm"></button>
+                    <button onclick="setPenColor('#dc2626')" class="w-6 h-6 rounded-full bg-red-600 border-2 border-white shadow-sm"></button>
+                </div>
+                <span class="text-slate-400">Gunakan mouse atau sentuhan jari untuk mencorat-coret.</span>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-white border-t border-slate-200 py-3 text-center text-xs text-slate-500">
+        <p>Kuis Pembelajaran Matematika SMP &bull; Persamaan dan Pertidaksamaan Linear Satu Variabel</p>
+    </footer>
+
+    <script>
+        // Quiz Data Definition
+        const quizData = [
+            {
+                id: 1,
+                topic: "Konsep Dasar PLSV",
+                questionLaTeX: "Di antara kalimat terbuka berikut, manakah yang merupakan bentuk **Persamaan Linear Satu Variabel (PLSV)**?",
+                options: [
+                    { id: 'A', text: "$2x + 3y = 12$" },
+                    { id: 'B', text: "$x^2 - 4 = 0$" },
+                    { id: 'C', text: "$3x - 5 = 10$" },
+                    { id: 'D', text: "$2x + 7 < 15$" }
+                ],
+                correctAnswer: 'C',
+                explanationLaTeX: `
+                    <strong>Analisis Pilihan:</strong><br>
+                    • $2x + 3y = 12$ merupakan persamaan linear <em>dua variabel</em> ($x$ dan $y$).<br>
+                    • $x^2 - 4 = 0$ merupakan persamaan <em>kuadrat</em> (berpangkat 2).<br>
+                    • $3x - 5 = 10$ adalah <strong>PLSV</strong> karena hanya memiliki 1 variabel ($x$), variabel berpangkat 1, dan menggunakan relasi '$=$'.<br>
+                    • $2x + 7 < 15$ adalah <em>pertidaksamaan</em> linear satu variabel (PtLSV).
+                `
+            },
+            {
+                id: 2,
+                topic: "Penyelesaian PLSV",
+                questionLaTeX: "Tentukan nilai $x$ yang memenuhi persamaan linear berikut:<br>$$4x - 9 = 2x + 7$$",
+                options: [
+                    { id: 'A', text: "$x = 4$" },
+                    { id: 'B', text: "$x = 8$" },
+                    { id: 'C', text: "$x = 6$" },
+                    { id: 'D', text: "$x = 12$" }
+                ],
+                correctAnswer: 'B',
+                explanationLaTeX: `
+                    <strong>Langkah-langkah Penyelesaian:</strong><br>
+                    1. Kelompokkan suku berpangkat variabel $x$ di ruas kiri dan konstanta di ruas kanan:<br>
+                       $$4x - 2x = 7 + 9$$<br>
+                    2. Sederhanakan kedua ruas:<br>
+                       $$2x = 16$$<br>
+                    3. Bagi kedua ruas dengan $2$:<br>
+                       $$x = \\frac{16}{2} = 8$$
+                `
+            },
+            {
+                id: 3,
+                topic: "PtLSV & Perkalian/Pembagian Negatif",
+                questionLaTeX: "Carilah himpunan penyelesaian dari pertidaksamaan linear berikut:<br>$$-3x + 8 < 23$$",
+                options: [
+                    { id: 'A', text: "$x > -5$" },
+                    { id: 'B', text: "$x < -5$" },
+                    { id: 'C', text: "$x > 5$" },
+                    { id: 'D', text: "$x < 5$" }
+                ],
+                correctAnswer: 'A',
+                explanationLaTeX: `
+                    <strong>Langkah-langkah Penyelesaian:</strong><br>
+                    1. Pindahkan konstanta $+8$ ke ruas kanan:<br>
+                       $$-3x < 23 - 8 \\implies -3x < 15$$<br>
+                    2. Bagi kedua ruas dengan $-3$. <span class="bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-medium">Penting:</span> Karena dibagi oleh bilangan <strong>negatif</strong>, tanda pertidaksamaan <strong>harus dibalik</strong> (dari $<$ menjadi $>$):<br>
+                       $$x > \\frac{15}{-3} \\implies x > -5$$
+                `
+            },
+            {
+                id: 4,
+                topic: "Soal Cerita / Aplikasi PLSV",
+                questionLaTeX: "Sebuah persegi panjang memiliki panjang $(2x + 3)\\text{ cm}$ dan lebar $(x - 1)\\text{ cm}$. Jika keliling persegi panjang tersebut adalah $34\\text{ cm}$, berapakah **luas** persegi panjang tersebut?",
+                options: [
+                    { id: 'A', text: "$45\\text{ cm}^2$" },
+                    { id: 'B', text: "$52\\text{ cm}^2$" },
+                    { id: 'C', text: "$60\\text{ cm}^2$" },
+                    { id: 'D', text: "$68\\text{ cm}^2$" }
+                ],
+                correctAnswer: 'B',
+                explanationLaTeX: `
+                    <strong>Langkah-langkah Penyelesaian:</strong><br>
+                    1. Rumus keliling $K = 2(p + l)$:<br>
+                       $$34 = 2[(2x + 3) + (x - 1)]$$<br>
+                       $$34 = 2(3x + 2) \\implies 17 = 3x + 2$$<br>
+                       $$3x = 15 \\implies x = 5$$<br>
+                    2. Cari ukuran panjang ($p$) dan lebar ($l$):<br>
+                       • Panjang $p = 2(5) + 3 = 13\\text{ cm}$<br>
+                       • Lebar $l = 5 - 1 = 4\\text{ cm}$<br>
+                    3. Hitung Luas ($L = p \\times l$):<br>
+                       $$L = 13 \\times 4 = 52\\text{ cm}^2$$
+                `
+            },
+            {
+                id: 5,
+                topic: "PtLSV Himpunan Semesta Bilangan Asli",
+                questionLaTeX: "Tentukan himpunan penyelesaian dari $3x - 5 \\le 10$ untuk $x \\in \\{1, 2, 3, 4, 5, 6, 7, \\dots\\}$ (bilangan asli).",
+                options: [
+                    { id: 'A', text: "$\\{1, 2, 3, 4, 5\\}$" },
+                    { id: 'B', text: "$\\{0, 1, 2, 3, 4, 5\\}$" },
+                    { id: 'C', text: "$\\{1, 2, 3, 4\\}$" },
+                    { id: 'D', text: "$\\{5, 6, 7, 8, \\dots\\}$" }
+                ],
+                correctAnswer: 'A',
+                explanationLaTeX: `
+                    <strong>Langkah-langkah Penyelesaian:</strong><br>
+                    1. Selesaikan pertidaksamaannya terlebih dahulu:<br>
+                       $$3x - 5 \\le 10 \\implies 3x \\le 15 \\implies x \\le 5$$<br>
+                    2. Pilih anggota yang memenuhi $x \\le 5$ dari himpunan bilangan asli (bilangan bulat positif dimulai dari $1$):<br>
+                       $$\\text{HP} = \\{1, 2, 3, 4, 5\\}$$<br>
+                    <em>Catatan: $0$ tidak termasuk karena bukan anggota bilangan asli.</em>
+                `
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let audioEnabled = true;
+        let timerSeconds = 0;
+        let timerInterval = null;
+
+        /**
+         * Converts raw text containing Markdown (**bold**) and LaTeX math ($...$ and $$...$$)
+         * into valid HTML using KaTeX renderToString function.
+         */
+        function formatContentAndMath(str) {
+            if (!str) return '';
+
+            // 1. Convert Markdown bold **text** to HTML <strong>
+            let formatted = str.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            // 2. Render Display Math $$...$$
+            formatted = formatted.replace(/\$\$(.*?)\$\$/g, (match, mathContent) => {
+                if (window.katex) {
+                    try {
+                        return `<div class="my-2 text-center">${window.katex.renderToString(mathContent.trim(), { displayMode: true, throwOnError: false })}</div>`;
+                    } catch (e) {
+                        console.error('KaTeX display error:', e);
+                    }
+                }
+                return `<div class="my-2 text-center font-mono">${mathContent}</div>`;
+            });
+
+            // 3. Render Inline Math $...$
+            formatted = formatted.replace(/\$(.*?)\$/g, (match, mathContent) => {
+                if (window.katex) {
+                    try {
+                        return window.katex.renderToString(mathContent.trim(), { displayMode: false, throwOnError: false });
+                    } catch (e) {
+                        console.error('KaTeX inline error:', e);
+                    }
+                }
+                // Fallback if KaTeX library failed to load
+                let cleanMath = mathContent
+                    .replace(/\\text\{([^}]+)\}/g, ' $1')
+                    .replace(/\\le/g, '≤')
+                    .replace(/\\ge/g, '≥')
+                    .replace(/\\implies/g, '⇒')
+                    .replace(/\\dots/g, '...')
+                    .replace(/\\in/g, '∈')
+                    .replace(/\^2/g, '²');
+                return `<span class="font-mono bg-slate-100 px-1 rounded text-blue-700">${cleanMath}</span>`;
+            });
+
+            return formatted;
+        }
+
+        // Web Audio API Synthesizer for SFX
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (!audioEnabled || !audioCtx) return;
+            try {
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, audioCtx.currentTime + 0.15); // E5
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.3);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, audioCtx.currentTime); // A3
+                    osc.frequency.exponentialRampToValueAtTime(164.81, audioCtx.currentTime + 0.2); // E3
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.25);
+                } else if (type === 'click') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.05);
+                }
+            } catch (e) {
+                console.log('Audio play error:', e);
+            }
+        }
+
+        function toggleAudio() {
+            audioEnabled = !audioEnabled;
+            const icon = document.getElementById('audio-icon');
+            if (audioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-yellow-300';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+            }
+        }
+
+        function startTimer() {
+            timerSeconds = 0;
+            clearInterval(timerInterval);
+            timerInterval = setInterval(() => {
+                timerSeconds++;
+                const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+                const secs = (timerSeconds % 60).toString().padStart(2, '0');
+                const el = document.getElementById('timer-display');
+                if (el) el.textContent = `${mins}:${secs}`;
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-view').classList.remove('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            currentQuestionIndex = 0;
+            userAnswers = new Array(quizData.length).fill(null);
+            startTimer();
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = quizData[currentQuestionIndex];
+            
+            // Badge & Progress
+            document.getElementById('question-badge').textContent = `Soal ${currentQuestionIndex + 1} dari ${quizData.length}`;
+            const progressPercent = ((currentQuestionIndex + 1) / quizData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Topic Tag
+            document.getElementById('topic-tag').textContent = q.topic;
+
+            // Question Text
+            const qTextEl = document.getElementById('question-text');
+            qTextEl.innerHTML = formatContentAndMath(q.questionLaTeX);
+
+            // Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const isAnswered = userAnswers[currentQuestionIndex] !== null;
+            const selectedOption = userAnswers[currentQuestionIndex];
+
+            q.options.forEach(opt => {
+                const optBtn = document.createElement('button');
+                optBtn.className = `option-card text-left p-4 rounded-xl border flex items-center justify-between w-full font-medium transition cursor-pointer`;
+                
+                let badgeClass = 'bg-slate-100 text-slate-600 border-slate-200';
+                let borderClass = 'border-slate-200 bg-white text-slate-700 hover:border-blue-400';
+
+                if (isAnswered) {
+                    optBtn.classList.add('disabled');
+                    if (opt.id === q.correctAnswer) {
+                        borderClass = 'border-emerald-500 bg-emerald-50 text-emerald-900 font-semibold ring-2 ring-emerald-500/30';
+                        badgeClass = 'bg-emerald-600 text-white';
+                    } else if (selectedOption === opt.id) {
+                        borderClass = 'border-red-500 bg-red-50 text-red-900 ring-2 ring-red-500/30';
+                        badgeClass = 'bg-red-600 text-white';
+                    } else {
+                        borderClass = 'border-slate-200 bg-slate-50 text-slate-400 opacity-60';
+                    }
+                }
+
+                optBtn.className += ` ${borderClass}`;
+
+                optBtn.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <span class="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${badgeClass}">
+                            ${opt.id}
+                        </span>
+                        <span class="option-text">${formatContentAndMath(opt.text)}</span>
+                    </div>
+                    ${isAnswered && opt.id === q.correctAnswer ? '<i class="fa-solid fa-circle-check text-emerald-600 text-lg"></i>' : ''}
+                    ${isAnswered && selectedOption === opt.id && opt.id !== q.correctAnswer ? '<i class="fa-solid fa-circle-xmark text-red-500 text-lg"></i>' : ''}
+                `;
+
+                if (!isAnswered) {
+                    optBtn.onclick = () => selectOption(opt.id);
+                }
+
+                optionsContainer.appendChild(optBtn);
+            });
+
+            // Feedback / Explanation Box
+            const feedbackBox = document.getElementById('feedback-box');
+            const feedbackTitle = document.getElementById('feedback-title');
+            const feedbackBody = document.getElementById('feedback-body');
+
+            if (isAnswered) {
+                feedbackBox.classList.remove('hidden');
+                const isCorrect = selectedOption === q.correctAnswer;
+
+                if (isCorrect) {
+                    feedbackBox.className = 'rounded-xl p-4 text-sm bg-emerald-50 border border-emerald-200 text-emerald-900 block';
+                    feedbackTitle.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-600"></i> Jawaban Kamu Benar!';
+                } else {
+                    feedbackBox.className = 'rounded-xl p-4 text-sm bg-red-50 border border-red-200 text-red-900 block';
+                    feedbackTitle.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-red-600"></i> Jawaban Kurang Tepat';
+                }
+
+                feedbackBody.innerHTML = `
+                    <div class="mt-2 text-slate-700 leading-relaxed border-t border-slate-200/60 pt-2">
+                        <div class="font-semibold text-xs text-slate-500 uppercase tracking-wider mb-1">Pembahasan:</div>
+                        <div>${formatContentAndMath(q.explanationLaTeX)}</div>
+                    </div>
+                `;
+            } else {
+                feedbackBox.classList.add('hidden');
+            }
+
+            // Update Navigation Buttons
+            document.getElementById('prev-btn').disabled = currentQuestionIndex === 0;
+
+            const nextBtn = document.getElementById('next-btn');
+            if (currentQuestionIndex === quizData.length - 1) {
+                nextBtn.innerHTML = '<span>Selesai & Lihat Hasil</span> <i class="fa-solid fa-flag-checkered"></i>';
+                nextBtn.className = 'px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-2 shadow-md shadow-emerald-500/20';
+            } else {
+                nextBtn.innerHTML = '<span>Selanjutnya</span> <i class="fa-solid fa-chevron-right"></i>';
+                nextBtn.className = 'px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium text-sm transition flex items-center gap-2 shadow-md shadow-blue-500/20';
+            }
+
+            // Live Score update
+            updateLiveScore();
+        }
+
+        function selectOption(optionId) {
+            if (userAnswers[currentQuestionIndex] !== null) return; // Prevent re-select
+            userAnswers[currentQuestionIndex] = optionId;
+
+            const q = quizData[currentQuestionIndex];
+            if (optionId === q.correctAnswer) {
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            renderQuestion();
+        }
+
+        function updateLiveScore() {
+            let correct = 0;
+            userAnswers.forEach((ans, idx) => {
+                if (ans === quizData[idx].correctAnswer) correct++;
+            });
+            document.getElementById('live-score').textContent = `${correct * 20} / 100`;
+        }
+
+        function prevQuestion() {
+            playSound('click');
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        function nextQuestion() {
+            playSound('click');
+            if (currentQuestionIndex < quizData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            stopTimer();
+            document.getElementById('quiz-view').classList.add('hidden');
+            document.getElementById('result-screen').classList.remove('hidden');
+
+            let correctCount = 0;
+            userAnswers.forEach((ans, idx) => {
+                if (ans === quizData[idx].correctAnswer) correctCount++;
+            });
+
+            const score = (correctCount / quizData.length) * 100;
+
+            // Update stats
+            document.getElementById('final-score').textContent = score;
+            document.getElementById('correct-count').textContent = `${correctCount} / ${quizData.length}`;
+            document.getElementById('accuracy-percent').textContent = `${score}%`;
+
+            const mins = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const secs = (timerSeconds % 60).toString().padStart(2, '0');
+            document.getElementById('total-time').textContent = `${mins}:${secs}`;
+
+            // Result badge & messages
+            const badgeEl = document.getElementById('result-badge');
+            const titleEl = document.getElementById('result-title');
+            const subtitleEl = document.getElementById('result-subtitle');
+
+            if (score === 100) {
+                badgeEl.className = 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-md bg-emerald-100 text-emerald-600';
+                titleEl.textContent = 'Sempurna! Luar Biasa! 🎉';
+                subtitleEl.textContent = 'Kamu telah menguasai konsep PLSV dan PtLSV dengan sangat baik!';
+            } else if (score >= 60) {
+                badgeEl.className = 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-md bg-blue-100 text-blue-600';
+                titleEl.textContent = 'Hasil yang Bagus! 👍';
+                subtitleEl.textContent = 'Pemahaman dasarmu sudah baik, terus tingkatkan ketelitian.';
+            } else {
+                badgeEl.className = 'w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3 text-3xl shadow-md bg-amber-100 text-amber-600';
+                titleEl.textContent = 'Tetap Semangat Belajar! 💪';
+                subtitleEl.textContent = 'Pelajari kembali pembahasan di bawah ini untuk memperdalam pemahamanmu.';
+            }
+
+            // Dynamic evaluation notes
+            const evalEl = document.getElementById('feedback-evaluation');
+            let evalHTML = '';
+
+            if (score === 100) {
+                evalHTML = `
+                    <p class="text-emerald-700"><i class="fa-solid fa-circle-check me-1"></i> <strong>Kekuatan:</strong> Kamu memahami definisi PLSV, cara eliminasi/substitusi ruas, aturan tanda pertidaksamaan, serta penerapan dalam bentuk soal cerita luas bangun datar.</p>
+                `;
+            } else {
+                evalHTML = `<ul class="list-disc list-inside space-y-1">`;
+                quizData.forEach((q, idx) => {
+                    const isCorrect = userAnswers[idx] === q.correctAnswer;
+                    if (isCorrect) {
+                        evalHTML += `<li class="text-emerald-700"><strong>${q.topic}:</strong> Sudah kamu kuasai dengan baik.</li>`;
+                    } else {
+                        evalHTML += `<li class="text-rose-700"><strong>${q.topic}:</strong> Perlu direview kembali (lihat langkah pembahasan di bawah).</li>`;
+                    }
+                });
+                evalHTML += `</ul>`;
+            }
+            evalEl.innerHTML = evalHTML;
+
+            // Build detailed solutions list
+            const solutionsList = document.getElementById('solutions-list');
+            solutionsList.innerHTML = '';
+
+            quizData.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.correctAnswer;
+
+                const solCard = document.createElement('div');
+                solCard.className = `p-4 rounded-xl border text-sm ${isCorrect ? 'bg-white border-slate-200' : 'bg-red-50/40 border-red-200'}`;
+
+                solCard.innerHTML = `
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <span class="font-bold text-slate-800">Soal ${idx + 1}: ${q.topic}</span>
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold ${isCorrect ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}">
+                            ${isCorrect ? 'Benar' : 'Salah'}
+                        </span>
+                    </div>
+                    <div class="sol-q-text text-slate-700 mb-2">${formatContentAndMath(q.questionLaTeX)}</div>
+                    <div class="text-xs space-y-1 bg-slate-50 p-2.5 rounded-lg border border-slate-100 mb-2">
+                        <div>Pilihan Kamu: <strong class="${isCorrect ? 'text-emerald-600' : 'text-red-600'}">${uAns ? uAns : 'Tidak diisi'}</strong></div>
+                        <div>Kunci Jawaban: <strong class="text-emerald-600">${q.correctAnswer}</strong></div>
+                    </div>
+                    <div class="sol-exp text-xs text-slate-600 border-t border-slate-200/60 pt-2">
+                        ${formatContentAndMath(q.explanationLaTeX)}
+                    </div>
+                `;
+
+                solutionsList.appendChild(solCard);
+            });
+        }
+
+        function restartQuiz() {
+            playSound('click');
+            startQuiz();
+        }
+
+        // Canvas / Scratchpad Interactive Drawing logic
+        let canvas, ctx;
+        let isDrawing = false;
+        let penColor = '#1e293b';
+
+        function initCanvas() {
+            canvas = document.getElementById('scratch-canvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+
+            function resizeCanvas() {
+                const rect = canvas.parentElement.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.strokeStyle = penColor;
+            }
+
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+
+            // Mouse events
+            canvas.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                ctx.beginPath();
+                const r = canvas.getBoundingClientRect();
+                ctx.moveTo(e.clientX - r.left, e.clientY - r.top);
+            });
+
+            canvas.addEventListener('mousemove', (e) => {
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                ctx.lineTo(e.clientX - r.left, e.clientY - r.top);
+                ctx.stroke();
+            });
+
+            canvas.addEventListener('mouseup', () => isDrawing = false);
+            canvas.addEventListener('mouseleave', () => isDrawing = false);
+
+            // Touch events for mobile scratchpad
+            canvas.addEventListener('touchstart', (e) => {
+                isDrawing = true;
+                ctx.beginPath();
+                const r = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                ctx.moveTo(touch.clientX - r.left, touch.clientY - r.top);
+                e.preventDefault();
+            });
+
+            canvas.addEventListener('touchmove', (e) => {
+                if (!isDrawing) return;
+                const r = canvas.getBoundingClientRect();
+                const touch = e.touches[0];
+                ctx.lineTo(touch.clientX - r.left, touch.clientY - r.top);
+                ctx.stroke();
+                e.preventDefault();
+            });
+
+            canvas.addEventListener('touchend', () => isDrawing = false);
+        }
+
+        function toggleScratchpad() {
+            playSound('click');
+            const modal = document.getElementById('scratchpad-modal');
+            const isHidden = modal.classList.contains('hidden');
+            if (isHidden) {
+                modal.classList.remove('hidden');
+                setTimeout(initCanvas, 50);
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+
+        function setPenColor(color) {
+            penColor = color;
+            if (ctx) ctx.strokeStyle = penColor;
+        }
+
+        // Initialize on window load
+        window.onload = function() {
+            console.log("Quiz PLSV dan PtLSV Siap.");
+        };
+    </script>
+</body>
+</html>
