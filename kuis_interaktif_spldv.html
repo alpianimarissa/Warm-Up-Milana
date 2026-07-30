@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif SPLDV - Matematika SMP/SMA</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- KaTeX CSS & JS for rendering math equations -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" onload="initKaTeX()"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f3ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        }
+                    },
+                    animation: {
+                        'bounce-short': 'bounce 0.5s ease-in-out 1',
+                        'fade-in': 'fadeIn 0.3s ease-out forwards',
+                        'pop-in': 'popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'translateY(10px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        popIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+        .katex-display {
+            margin: 0.5em 0 !important;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 4px 0;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(241, 245, 249, 0.5);
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between text-slate-800 antialiased selection:bg-indigo-500 selection:text-white">
+
+    <!-- Top Header -->
+    <header class="w-full max-w-5xl mx-auto p-4 sm:p-6 flex justify-between items-center text-white">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-indigo-600/80 border border-indigo-400/30 flex items-center justify-center shadow-lg shadow-indigo-500/20 backdrop-blur-md">
+                <i class="fa-solid fa-calculator text-xl sm:text-2xl text-indigo-200"></i>
+            </div>
+            <div>
+                <h1 class="font-extrabold text-lg sm:text-2xl tracking-tight leading-none text-white">EduMath <span class="text-indigo-400">SPLDV</span></h1>
+                <p class="text-xs sm:text-sm text-indigo-200/80 mt-1">Sistem Persamaan Linear Dua Variabel</p>
+            </div>
+        </div>
+        <div id="sound-toggle-btn" onclick="toggleSound()" class="cursor-pointer bg-white/10 hover:bg-white/20 text-white px-3 py-2 sm:px-4 sm:py-2 rounded-xl backdrop-blur-md transition-all flex items-center space-x-2 text-xs sm:text-sm border border-white/10">
+            <i id="sound-icon" class="fa-solid fa-volume-high text-indigo-300"></i>
+            <span id="sound-text" class="hidden sm:inline font-medium">Suara On</span>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="w-full max-w-3xl mx-auto px-4 py-2 flex-grow flex flex-col justify-center">
+
+        <!-- 1. WELCOME SCREEN -->
+        <section id="welcome-screen" class="glass-card rounded-3xl p-6 sm:p-10 shadow-2xl animate-pop-in border border-white/40 my-auto">
+            <div class="text-center space-y-6">
+                <div class="inline-flex p-4 bg-indigo-100 rounded-3xl text-indigo-600 mb-2">
+                    <i class="fa-solid fa-graduation-cap text-4xl sm:text-5xl"></i>
+                </div>
+                <div>
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-semibold px-3 py-1 rounded-full uppercase tracking-wider">Kuis Interaktif SMP / SMA</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-2">Uji Pemahaman SPLDV</h2>
+                    <p class="text-slate-600 text-sm sm:text-base max-w-lg mx-auto mt-2 leading-relaxed">
+                        Selesaikan 5 soal pilihan ganda interaktif lengkap dengan perhitungan, konsep kontekstual, dan pembahasan rinci di setiap soal.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left my-6">
+                    <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/60 flex items-center space-x-3">
+                        <i class="fa-solid fa-list-check text-indigo-500 text-xl"></i>
+                        <div>
+                            <div class="text-xs text-slate-500">Jumlah Soal</div>
+                            <div class="font-bold text-slate-800 text-sm sm:text-base">5 Soal Pilihan</div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/60 flex items-center space-x-3">
+                        <i class="fa-solid fa-clock text-emerald-500 text-xl"></i>
+                        <div>
+                            <div class="text-xs text-slate-500">Waktu Lengkap</div>
+                            <div class="font-bold text-slate-800 text-sm sm:text-base">Santai / Tanpa Batas</div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/60 flex items-center space-x-3">
+                        <i class="fa-solid fa-book-open text-amber-500 text-xl"></i>
+                        <div>
+                            <div class="text-xs text-slate-500">Fitur</div>
+                            <div class="font-bold text-slate-800 text-sm sm:text-base">Pembahasan Lengkap</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-4 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-lg rounded-2xl shadow-lg shadow-indigo-500/30 transition-all duration-200 flex items-center justify-center space-x-3 mx-auto group">
+                    <span>Mulai Kuis Sekarang</span>
+                    <i class="fa-solid fa-arrow-right transition-transform group-hover:translate-x-1"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 2. QUIZ SCREEN -->
+        <section id="quiz-screen" class="hidden glass-card rounded-3xl p-5 sm:p-8 shadow-2xl border border-white/40 my-auto">
+            <!-- Progress & Stats Header -->
+            <div class="space-y-3 mb-6">
+                <div class="flex justify-between items-center text-xs sm:text-sm font-semibold text-slate-600">
+                    <span id="question-progress-text" class="flex items-center space-x-2">
+                        <span class="bg-indigo-600 text-white px-2.5 py-0.5 rounded-full text-xs font-bold">Soal <span id="current-question-num">1</span> dari 5</span>
+                    </span>
+                    <span class="flex items-center space-x-2 text-slate-500">
+                        <i class="fa-solid fa-trophy text-amber-500"></i>
+                        <span>Skor: <strong id="live-score" class="text-slate-800">0</strong></span>
+                    </span>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full bg-slate-200/80 rounded-full h-2.5 overflow-hidden p-0.5">
+                    <div id="progress-bar" class="bg-indigo-600 h-1.5 rounded-full transition-all duration-300 w-0"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-slate-50/90 rounded-2xl p-5 sm:p-6 border border-slate-200/80 mb-6 shadow-inner">
+                <div class="flex items-start space-x-3">
+                    <div class="bg-indigo-100 text-indigo-700 p-2 rounded-xl text-lg font-bold flex-shrink-0 mt-0.5">
+                        <i class="fa-solid fa-circle-question"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <div id="question-text" class="text-slate-800 text-base sm:text-lg font-medium leading-relaxed">
+                            <!-- Question rendered dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Answer Options Grid -->
+            <div id="options-container" class="grid grid-cols-1 gap-3 sm:gap-4 mb-6">
+                <!-- Options rendered dynamically -->
+            </div>
+
+            <!-- Explanation Box (Initially Hidden) -->
+            <div id="explanation-box" class="hidden bg-indigo-50/90 border border-indigo-200 rounded-2xl p-4 sm:p-5 mb-6 animate-fade-in">
+                <div class="flex items-center space-x-2 text-indigo-900 font-bold mb-2">
+                    <i class="fa-solid fa-lightbulb text-amber-500 text-lg"></i>
+                    <span>Pembahasan & Langkah Penyelesaian:</span>
+                </div>
+                <div id="explanation-text" class="text-slate-700 text-sm sm:text-base leading-relaxed space-y-2">
+                    <!-- Explanation content rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- Bottom Action Footer -->
+            <div class="flex justify-between items-center pt-2 border-t border-slate-200/60">
+                <div id="feedback-badge" class="hidden items-center space-x-2 font-bold text-sm sm:text-base">
+                    <!-- Correct/Incorrect Badge -->
+                </div>
+                <button id="next-btn" onclick="nextQuestion()" disabled class="ml-auto px-6 py-3 bg-slate-300 text-slate-500 font-bold rounded-xl transition-all duration-200 flex items-center space-x-2 cursor-not-allowed">
+                    <span>Soal Berikutnya</span>
+                    <i class="fa-solid fa-chevron-right text-xs"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- 3. RESULT SCREEN -->
+        <section id="result-screen" class="hidden glass-card rounded-3xl p-6 sm:p-10 shadow-2xl animate-pop-in border border-white/40 my-auto">
+            <div class="text-center space-y-6">
+                <!-- Result Icon Header -->
+                <div id="result-icon-container" class="inline-flex p-5 rounded-full text-5xl mb-1 shadow-lg">
+                    <!-- Icon inserted dynamically -->
+                </div>
+
+                <div>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-slate-900" id="result-title">Hasil Kuis Anda</h2>
+                    <p class="text-slate-600 text-sm sm:text-base mt-2" id="result-subtitle">Berikut adalah ringkasan performa Anda pada kuis SPLDV.</p>
+                </div>
+
+                <!-- Score Board Card -->
+                <div class="bg-slate-50/90 rounded-2xl p-6 border border-slate-200/80 max-w-md mx-auto shadow-sm">
+                    <div class="text-xs uppercase tracking-wider text-slate-500 font-bold mb-1">Skor Akhir</div>
+                    <div class="text-5xl sm:text-6xl font-black text-indigo-600 tracking-tight" id="final-score">0</div>
+                    <div class="text-sm font-medium text-slate-600 mt-2" id="final-accuracy">Akurasi: 0%</div>
+
+                    <div class="grid grid-cols-2 gap-4 mt-6 pt-4 border-t border-slate-200/80">
+                        <div class="text-center">
+                            <span class="block text-2xl font-bold text-emerald-600" id="correct-count">0</span>
+                            <span class="text-xs text-slate-500 font-medium">Benar</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-2xl font-bold text-rose-500" id="wrong-count">0</span>
+                            <span class="text-xs text-slate-500 font-medium">Salah</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row justify-center gap-3 pt-2">
+                    <button onclick="toggleReviewMode()" class="px-6 py-3.5 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-xl shadow-md transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-list-check"></i>
+                        <span>Lihat Semua Pembahasan</span>
+                    </button>
+                    <button onclick="restartQuiz()" class="px-6 py-3.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-md shadow-indigo-500/20 transition-all flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-rotate-right"></i>
+                        <span>Coba Kuis Lagi</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Review Questions Accordion (Initially Hidden) -->
+            <div id="review-container" class="hidden mt-8 pt-8 border-t border-slate-200/80 space-y-4 max-h-[450px] overflow-y-auto pr-2 custom-scrollbar">
+                <h3 class="font-bold text-lg text-slate-800 text-left mb-4 flex items-center space-x-2">
+                    <i class="fa-solid fa-magnifying-glass text-indigo-600"></i>
+                    <span>Tinjauan Semua Soal & Pembahasan</span>
+                </h3>
+                <div id="review-list" class="space-y-4 text-left">
+                    <!-- Review items dynamically generated -->
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="w-full text-center py-4 text-indigo-200/60 text-xs sm:text-sm">
+        <p>&copy; 2026 EduMath Interactive • Media Pembelajaran Matematika Interaktif SPLDV</p>
+    </footer>
+
+    <script>
+        /* sound audio engine using Web Audio API */
+        let soundEnabled = true;
+        let audioCtx = null;
+
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = getAudioContext();
+                const now = ctx.currentTime;
+
+                if (type === 'correct') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, now); // C5
+                    osc.frequency.exponentialRampToValueAtTime(659.25, now + 0.1); // E5
+                    osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.2); // G5
+                    
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.35);
+                } else if (type === 'wrong') {
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, now); // A3
+                    osc.frequency.exponentialRampToValueAtTime(164.81, now + 0.2); // E3
+
+                    gain.gain.setValueAtTime(0.2, now);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+
+                    osc.start(now);
+                    osc.stop(now + 0.25);
+                } else if (type === 'complete') {
+                    const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                    notes.forEach((freq, idx) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, now + idx * 0.1);
+
+                        gain.gain.setValueAtTime(0.15, now + idx * 0.1);
+                        gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.1 + 0.3);
+
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+
+                        osc.start(now + idx * 0.1);
+                        osc.stop(now + idx * 0.1 + 0.3);
+                    });
+                }
+            } catch (e) {
+                console.log('Audio error:', e);
+            }
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const soundIcon = document.getElementById('sound-icon');
+            const soundText = document.getElementById('sound-text');
+            if (soundEnabled) {
+                soundIcon.className = 'fa-solid fa-volume-high text-indigo-300';
+                soundText.innerText = 'Suara On';
+            } else {
+                soundIcon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                soundText.innerText = 'Suara Off';
+            }
+        }
+
+        const questionsData = [
+            {
+                id: 1,
+                question: "Harga $2$ buku tulis dan $3$ pensil adalah $\\text{Rp}16.000,00$. Harga $3$ buku tulis dan $4$ pensil dengan jenis yang sama adalah $\\text{Rp}23.000,00$. Jika Ani membeli $1$ buku tulis dan $1$ pensil, berapakah uang yang harus dibayar Ani?",
+                options: [
+                    "$\\text{Rp}6.000,00$",
+                    "$\\text{Rp}7.000,00$",
+                    "$\\text{Rp}8.000,00$",
+                    "$\\text{Rp}9.000,00$"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    Misalkan harga 1 buku tulis = $x$ dan harga 1 pensil = $y$.<br>
+                    Diperoleh sistem persamaan linear dua variabel:<br>
+                    (1) $2x + 3y = 16.000$<br>
+                    (2) $3x + 4y = 23.000$<br><br>
+                    <strong>Eliminasi $x$:</strong><br>
+                    Kalikan persamaan (1) dengan $3$ dan persamaan (2) dengan $2$:<br>
+                    $6x + 9y = 48.000$<br>
+                    $6x + 8y = 46.000$<br>
+                    --------------------------- ($-$)<br>
+                    $y = 2.000$ (Harga 1 pensil)<br><br>
+                    <strong>Substitusi $y = 2.000$ ke persamaan (1):</strong><br>
+                    $2x + 3(2.000) = 16.000$<br>
+                    $2x + 6.000 = 16.000 \\implies 2x = 10.000 \\implies x = 5.000$ (Harga 1 buku)<br><br>
+                    Harga $1$ buku dan $1$ pensil = $x + y = 5.000 + 2.000 = \\mathbf{\\text{Rp}7.000,00}$.
+                `
+            },
+            {
+                id: 2,
+                question: "Diketahui sistem persamaan linear dua variabel $3x - 2y = 11$ dan $2x + 5y = 1$. Jika penyelesaian dari sistem tersebut adalah $(x, y)$, maka nilai dari $2x - y$ adalah...",
+                options: [
+                    "$5$",
+                    "$6$",
+                    "$7$",
+                    "$8$"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    Persamaan:<br>
+                    (1) $3x - 2y = 11$<br>
+                    (2) $2x + 5y = 1$<br><br>
+                    <strong>Eliminasi $y$:</strong><br>
+                    Kalikan persamaan (1) dengan $5$ dan persamaan (2) dengan $2$:<br>
+                    $15x - 10y = 55$<br>
+                    $4x + 10y = 2$<br>
+                    --------------------------- ($+$)<br>
+                    $19x = 57 \\implies x = 3$<br><br>
+                    <strong>Substitusi $x = 3$ ke (2):</strong><br>
+                    $2(3) + 5y = 1 \\implies 6 + 5y = 1 \\implies 5y = -5 \\implies y = -1$<br><br>
+                    <strong>Hitung nilai $2x - y$:</strong><br>
+                    $2x - y = 2(3) - (-1) = 6 + 1 = \\mathbf{7}$.
+                `
+            },
+            {
+                id: 3,
+                question: "Sistem persamaan linear $2x + 4y = 12$ dan $ax + 6y = 18$ memiliki tak hingga banyak penyelesaian. Nilai $a$ yang memenuhi adalah...",
+                options: [
+                    "$2$",
+                    "$3$",
+                    "$4$",
+                    "$6$"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    SPLDV memliki tak hingga banyak penyelesaian jika kedua persamaan saling tergantung linear (berimpit). Syarat perbandingan koefisien:<br>
+                    $$\\frac{a_1}{a_2} = \\frac{b_1}{b_2} = \\frac{c_1}{c_2}$$<br>
+                    Dari persamaan $2x + 4y = 12$ dan $ax + 6y = 18$:<br>
+                    $$\\frac{2}{a} = \\frac{4}{6} = \\frac{12}{18}$$<br>
+                    Sederhanakan perbandingan $\\frac{4}{6} = \\frac{2}{3}$.<br>
+                    Maka: $\\frac{2}{a} = \\frac{2}{3} \\implies a = \\mathbf{3}$.
+                `
+            },
+            {
+                id: 4,
+                question: "Keliling sebuah persegi panjang adalah $44\\text{ cm}$. Jika ukuran panjangnya $4\\text{ cm}$ lebih dari lebarnya, maka luas persegi panjang tersebut adalah...",
+                options: [
+                    "$108\\text{ cm}^2$",
+                    "$117\\text{ cm}^2$",
+                    "$126\\text{ cm}^2$",
+                    "$135\\text{ cm}^2$"
+                ],
+                correctIndex: 1,
+                explanation: `
+                    Misalkan panjang = $p$ cm dan lebar = $l$ cm.<br>
+                    Dari soal diperoleh SPLDV:<br>
+                    (1) $2(p + l) = 44 \\implies p + l = 22$<br>
+                    (2) $p = l + 4 \\implies p - l = 4$<br><br>
+                    <strong>Eliminasi $l$ dengan menjumlahkan kedua persamaan:</strong><br>
+                    $(p + l) + (p - l) = 22 + 4$<br>
+                    $2p = 26 \\implies p = 13\\text{ cm}$<br><br>
+                    <strong>Substitusi $p = 13$ ke (1):</strong><br>
+                    $13 + l = 22 \\implies l = 9\\text{ cm}$<br><br>
+                    <strong>Hitung Luas Persegi Panjang:</strong><br>
+                    $\\text{Luas} = p \\times l = 13 \\times 9 = \\mathbf{117\\text{ cm}^2}$.
+                `
+            },
+            {
+                id: 5,
+                question: "Umur Pak Andi saat ini adalah $4$ kali umur Budi. Enam tahun yang lalu, jumlah umur mereka adalah $43$ tahun. Umur Budi saat ini adalah...",
+                options: [
+                    "$9\\text{ tahun}$",
+                    "$10\\text{ tahun}$",
+                    "$11\\text{ tahun}$",
+                    "$12\\text{ tahun}$"
+                ],
+                correctIndex: 2,
+                explanation: `
+                    Misalkan umur Pak Andi saat ini = $A$ tahun dan umur Budi = $B$ tahun.<br>
+                    (1) $A = 4B$<br>
+                    (2) $(A - 6) + (B - 6) = 43 \\implies A + B - 12 = 43 \\implies A + B = 55$<br><br>
+                    <strong>Substitusi persamaan (1) ke persamaan (2):</strong><br>
+                    $4B + B = 55$<br>
+                    $5B = 55 \\implies B = \\mathbf{11\\text{ tahun}}$.<br><br>
+                    Jadi, umur Budi saat ini adalah $11\\text{ tahun}$ (dan umur Pak Andi = $44\\text{ tahun}$).
+                `
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = []; // Array to store user selected indexes
+        let isAnswered = false;
+
+        function initKaTeX() {
+            if (window.renderMathInElement) {
+                renderMathInElement(document.body, {
+                    delimiters: [
+                        {left: '$$', right: '$$', display: true},
+                        {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                });
+            }
+        }
+
+        function triggerMathRender() {
+            setTimeout(() => {
+                initKaTeX();
+            }, 50);
+        }
+
+        function startQuiz() {
+            getAudioContext(); // Activate audio on click
+            document.getElementById('welcome-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            
+            currentQuestionIndex = 0;
+            score = 0;
+            userAnswers = [];
+            
+            loadQuestion();
+        }
+
+        function loadQuestion() {
+            isAnswered = false;
+            const q = questionsData[currentQuestionIndex];
+
+            // Update Progress Header
+            document.getElementById('current-question-num').innerText = currentQuestionIndex + 1;
+            document.getElementById('live-score').innerText = score;
+            const progressPercent = ((currentQuestionIndex) / questionsData.length) * 100;
+            document.getElementById('progress-bar').style.width = `${progressPercent}%`;
+
+            // Reset UI components
+            document.getElementById('question-text').innerHTML = q.question;
+            document.getElementById('explanation-box').classList.add('hidden');
+            document.getElementById('feedback-badge').classList.add('hidden');
+            
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = true;
+            nextBtn.className = "ml-auto px-6 py-3 bg-slate-300 text-slate-500 font-bold rounded-xl transition-all duration-200 flex items-center space-x-2 cursor-not-allowed";
+            if (currentQuestionIndex === questionsData.length - 1) {
+                nextBtn.innerHTML = `<span>Lihat Hasil</span><i class="fa-solid fa-flag-checkered text-xs"></i>`;
+            } else {
+                nextBtn.innerHTML = `<span>Soal Berikutnya</span><i class="fa-solid fa-chevron-right text-xs"></i>`;
+            }
+
+            // Render Options
+            const optionsContainer = document.getElementById('options-container');
+            optionsContainer.innerHTML = '';
+
+            const optionLabels = ['A', 'B', 'C', 'D'];
+
+            q.options.forEach((optText, idx) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full p-4 rounded-2xl border-2 text-left font-medium flex items-center justify-between transition-all duration-200 bg-white border-slate-200/80 hover:border-indigo-400 hover:bg-indigo-50/40 text-slate-700 shadow-sm group`;
+                btn.onclick = () => selectAnswer(idx);
+                btn.id = `option-${idx}`;
+
+                btn.innerHTML = `
+                    <div class="flex items-center space-x-3.5">
+                        <span class="option-prefix w-8 h-8 rounded-xl bg-slate-100 text-slate-600 font-bold flex items-center justify-center text-sm border border-slate-200 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                            ${optionLabels[idx]}
+                        </span>
+                        <span class="option-text text-base sm:text-lg">${optText}</span>
+                    </div>
+                    <div class="status-icon text-lg hidden"></div>
+                `;
+                optionsContainer.appendChild(btn);
+            });
+
+            triggerMathRender();
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (isAnswered) return;
+            isAnswered = true;
+
+            const q = questionsData[currentQuestionIndex];
+            userAnswers.push(selectedIndex);
+            const isCorrect = (selectedIndex === q.correctIndex);
+
+            if (isCorrect) {
+                score += 20;
+                playSound('correct');
+            } else {
+                playSound('wrong');
+            }
+
+            // Update live score
+            document.getElementById('live-score').innerText = score;
+
+            // Highlight Options
+            q.options.forEach((_, idx) => {
+                const btn = document.getElementById(`option-${idx}`);
+                const statusIcon = btn.querySelector('.status-icon');
+                const prefix = btn.querySelector('.option-prefix');
+
+                btn.classList.remove('hover:border-indigo-400', 'hover:bg-indigo-50/40', 'bg-white', 'border-slate-200/80');
+
+                if (idx === q.correctIndex) {
+                    btn.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900');
+                    prefix.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+                    statusIcon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i>`;
+                    statusIcon.classList.remove('hidden');
+                } else if (idx === selectedIndex && !isCorrect) {
+                    btn.classList.add('bg-rose-50', 'border-rose-400', 'text-rose-900');
+                    prefix.classList.add('bg-rose-500', 'text-white', 'border-rose-500');
+                    statusIcon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-500"></i>`;
+                    statusIcon.classList.remove('hidden');
+                } else {
+                    btn.classList.add('bg-slate-50', 'border-slate-200', 'opacity-60');
+                }
+                btn.disabled = true;
+            });
+
+            // Feedback badge
+            const feedbackBadge = document.getElementById('feedback-badge');
+            feedbackBadge.classList.remove('hidden');
+            feedbackBadge.classList.add('flex');
+
+            if (isCorrect) {
+                feedbackBadge.className = 'flex items-center space-x-2 font-bold text-sm sm:text-base text-emerald-600';
+                feedbackBadge.innerHTML = `<i class="fa-solid fa-circle-check text-lg"></i><span>Jawaban Benar! (+20 poin)</span>`;
+            } else {
+                feedbackBadge.className = 'flex items-center space-x-2 font-bold text-sm sm:text-base text-rose-600';
+                feedbackBadge.innerHTML = `<i class="fa-solid fa-circle-xmark text-lg"></i><span>Jawaban Kurang Tepat</span>`;
+            }
+
+            // Show explanation
+            const explanationBox = document.getElementById('explanation-box');
+            document.getElementById('explanation-text').innerHTML = q.explanation;
+            explanationBox.classList.remove('hidden');
+
+            // Enable Next Button
+            const nextBtn = document.getElementById('next-btn');
+            nextBtn.disabled = false;
+            nextBtn.className = "ml-auto px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all duration-200 flex items-center space-x-2 cursor-pointer active:scale-95";
+
+            triggerMathRender();
+        }
+
+        function nextQuestion() {
+            if (!isAnswered) return;
+
+            currentQuestionIndex++;
+            if (currentQuestionIndex < questionsData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            playSound('complete');
+
+            // Update Progress Bar to 100%
+            document.getElementById('progress-bar').style.width = '100%';
+
+            document.getElementById('quiz-screen').classList.add('hidden');
+            const resultScreen = document.getElementById('result-screen');
+            resultScreen.classList.remove('hidden');
+
+            const totalQuestions = questionsData.length;
+            const correctCount = score / 20;
+            const wrongCount = totalQuestions - correctCount;
+            const accuracy = Math.round((correctCount / totalQuestions) * 100);
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('final-accuracy').innerText = `Akurasi: ${accuracy}%`;
+            document.getElementById('correct-count').innerText = correctCount;
+            document.getElementById('wrong-count').innerText = wrongCount;
+
+            const iconContainer = document.getElementById('result-icon-container');
+            const resultTitle = document.getElementById('result-title');
+            const resultSubtitle = document.getElementById('result-subtitle');
+
+            if (score === 100) {
+                iconContainer.className = 'inline-flex p-5 rounded-full text-5xl mb-1 shadow-lg bg-amber-100 text-amber-500';
+                iconContainer.innerHTML = `<i class="fa-solid fa-crown"></i>`;
+                resultTitle.innerText = 'Luar Biasa! Sempurna!';
+                resultSubtitle.innerText = 'Anda menguasai konsep SPLDV dengan sangat baik!';
+            } else if (score >= 60) {
+                iconContainer.className = 'inline-flex p-5 rounded-full text-5xl mb-1 shadow-lg bg-indigo-100 text-indigo-600';
+                iconContainer.innerHTML = `<i class="fa-solid fa-award"></i>`;
+                resultTitle.innerText = 'Kerja Bagus!';
+                resultSubtitle.innerText = 'Pemahaman Anda mengenai SPLDV sudah cukup mantap.';
+            } else {
+                iconContainer.className = 'inline-flex p-5 rounded-full text-5xl mb-1 shadow-lg bg-slate-100 text-slate-600';
+                iconContainer.innerHTML = `<i class="fa-solid fa-book-open-reader"></i>`;
+                resultTitle.innerText = 'Tetap Semangat!';
+                resultSubtitle.innerText = 'Pelajari kembali pembahasan soal untuk semakin mahir dalam SPLDV.';
+            }
+
+            // Populate Review Items
+            const reviewList = document.getElementById('review-list');
+            reviewList.innerHTML = '';
+
+            questionsData.forEach((q, idx) => {
+                const userChoice = userAnswers[idx];
+                const isUserCorrect = (userChoice === q.correctIndex);
+                const optionLabels = ['A', 'B', 'C', 'D'];
+
+                const item = document.createElement('div');
+                item.className = `p-4 sm:p-5 rounded-2xl border ${isUserCorrect ? 'bg-emerald-50/60 border-emerald-200' : 'bg-rose-50/60 border-rose-200'} space-y-3`;
+
+                item.innerHTML = `
+                    <div class="flex items-start justify-between">
+                        <span class="font-bold text-sm ${isUserCorrect ? 'text-emerald-700' : 'text-rose-700'}">Soal ${idx + 1}</span>
+                        <span class="text-xs font-bold px-2.5 py-1 rounded-full ${isUserCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'} flex items-center space-x-1">
+                            <i class="fa-solid ${isUserCorrect ? 'fa-check' : 'fa-xmark'}"></i>
+                            <span>${isUserCorrect ? 'Benar' : 'Salah'}</span>
+                        </span>
+                    </div>
+                    <div class="text-slate-800 text-sm font-medium leading-relaxed">${q.question}</div>
+                    <div class="text-xs sm:text-sm space-y-1 text-slate-600 bg-white/70 p-3 rounded-xl border border-slate-200/60">
+                        <div><strong class="text-slate-700">Jawaban Anda:</strong> ${userChoice !== undefined ? optionLabels[userChoice] + '. ' + q.options[userChoice] : 'Tidak dijawab'}</div>
+                        <div><strong class="text-emerald-700">Jawaban Benar:</strong> ${optionLabels[q.correctIndex]}. ${q.options[q.correctIndex]}</div>
+                    </div>
+                    <div class="text-xs sm:text-sm text-slate-700 bg-indigo-50/80 p-3 rounded-xl border border-indigo-100">
+                        <div class="font-bold text-indigo-900 mb-1"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i>Pembahasan:</div>
+                        <div>${q.explanation}</div>
+                    </div>
+                `;
+                reviewList.appendChild(item);
+            });
+
+            triggerMathRender();
+        }
+
+        function toggleReviewMode() {
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.classList.toggle('hidden');
+            if (!reviewContainer.classList.contains('hidden')) {
+                reviewContainer.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function restartQuiz() {
+            document.getElementById('review-container').classList.add('hidden');
+            startQuiz();
+        }
+
+        // Initialize KaTeX on window load
+        window.onload = function() {
+            initKaTeX();
+        }
+    </script>
+</body>
+</html>
